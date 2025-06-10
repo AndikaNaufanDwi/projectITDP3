@@ -1,4 +1,4 @@
-export const fetchRoadmap = async (dealRef, setHistoryList) => {
+export const fetchRoadmap = async (dealRef, setRoadmapList) => {
   const base_url = 'https://726c-210-210-144-170.ngrok-free.app';
   const token = localStorage.getItem('token'); 
 
@@ -15,7 +15,7 @@ export const fetchRoadmap = async (dealRef, setHistoryList) => {
     }
 
     const data = await response.json();
-    setHistoryList(data);
+    setRoadmapList(data);
   } catch (err) {
     console.error('Gagal fetch history:', err);
   }

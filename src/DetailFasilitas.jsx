@@ -5,6 +5,7 @@ import { fetchFasilitasDetail } from './services/DetailFasilitas';
 import { updateAgunan } from "./services/UpdateAgunan";
 import EditAgunanModal from "./components/EditAgunanModal";
 import { fetchHistory } from "./services/GetHistory";
+import { fetchRoadmap } from "./services/GetRoadmap";
 import { tambahHistory } from "./services/TambahHistory";
 import { deleteHistory } from './services/HapusHistory';
 import { toast, Bounce } from "react-toastify";
@@ -61,7 +62,7 @@ export default function DetailFasilitas() {
         if (dealRef) {
             fetchFasilitasDetail(dealRef, setFasilitas);
             fetchHistory(dealRef, setHistoryList);
-            fetchHistory(dealRef, setHistoryList);
+            fetchRoadmap(dealRef, setRoadmapList);
         }
     }, [dealRef]);
 
@@ -180,11 +181,11 @@ export default function DetailFasilitas() {
                                 {roadmapList
                                 .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))
                                 .map((item, idx) => (
-                                    <div key={idx} className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-yelloe-500 transition duration-200">
+                                    <div key={idx} className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-yellow-500 transition duration-200">
                                         <div className="absolute -left-[10.5px] top-0 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white" />
                                         <p className="text-base font-bold text-yellow-700">{item.jenis_kegiatan}</p>
-                                        <p className="text-gray-600">PPK - {item.ao_input}</p>
-                                        <p className="text-gray-700">{item.keterangan_kegiatan}</p>
+                                        <p className="text-gray-600">{item.keterangan}</p>
+                                        <p className="text-gray-700">{item.plan}</p>
                                         <p className="text-xs text-gray-400">{formatDate(item.tanggal)}</p>
                                     </div>
                                 ))}
