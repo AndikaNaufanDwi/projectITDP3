@@ -3,7 +3,7 @@ export const fetchRoadmap = async (dealRef, setHistoryList) => {
   const token = localStorage.getItem('token'); 
 
   try {
-    const response = await fetch(`${base_url}/roadmap-plans/${dealRef}`, {
+    const response = await fetch(`${base_url}/roadmap-events/${dealRef}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'ngrok-skip-browser-warning': '69420'
