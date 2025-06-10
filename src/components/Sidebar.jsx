@@ -31,7 +31,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
       <p className="mb-6 text-sm font-semibold">Halo, user!</p>
 
       <nav className="w-full space-y-2 px-4 text-sm">
-        <p1>In Development</p1>
+        <p>In Development</p>
         <Link
           to="/dashboard"
           className={`py-2 px-3 rounded flex items-center space-x-2 ${isDashboardActive
@@ -100,7 +100,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
        
 
         {/* TESTING PHASE PART */}
-        <p1>Real Sidebar Testing</p1>
+        <p>Real Sidebar Testing</p>
         {/* Dasboard Manager */}
         {(role === 'Manager PPK') && (
           <Link

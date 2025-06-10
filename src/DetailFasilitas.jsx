@@ -7,7 +7,7 @@ import EditAgunanModal from "./components/EditAgunanModal";
 import { fetchHistory } from "./services/GetHistory";
 import { tambahHistory } from "./services/TambahHistory";
 import { deleteHistory } from './services/HapusHistory';
-import { ToastContainer, toast, Bounce } from "react-toastify";
+import { toast, Bounce } from "react-toastify";
 
 export default function DetailFasilitas() {
     const [activeTab, setActiveTab] = useState('history');
@@ -17,6 +17,7 @@ export default function DetailFasilitas() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [editedAgunan, setEditedAgunan] = useState([]);
     const [historyList, setHistoryList] = useState([]);
+    const [roadmapList, setRoadmapList] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [eventName, setEventName] = useState("");
@@ -59,6 +60,7 @@ export default function DetailFasilitas() {
     useEffect(() => {
         if (dealRef) {
             fetchFasilitasDetail(dealRef, setFasilitas);
+            fetchHistory(dealRef, setHistoryList);
             fetchHistory(dealRef, setHistoryList);
         }
     }, [dealRef]);
@@ -172,28 +174,20 @@ export default function DetailFasilitas() {
                     </div>
                     {activeTab === 'roadmap' && (
                         <div>
-                            <button
-                                onClick={() => setShowModal(true)}
-                                className="mb-4 bg-blue-900 text-white px-4 py-2 rounded text-sm"
-                            >
-                                Tambah Event
-                            </button>
                             <h2 className="text-lg font-semibold mb-2">Roadmap Recovery NPL</h2>
 
-                            <div className="space-y-6 text-sm">
-                                <div>
-                                    <p className="font-bold text-yellow-700">📍 Kunjungan Lapangan</p>
-                                    <p className="text-gray-600">PPK - Pandi Ratama</p>
-                                    <p>Verifikasi kondisi usaha/debitur di lokasi.</p>
-                                    <p className="text-xs text-gray-400">29 Juli 2025</p>
-                                </div>
-                                <div>
-                                    <p className="font-bold text-yellow-700">📍 Peringatan Kedua (Jika Gagal Bayar Ulang)</p>
-                                    <p className="text-gray-600">PPK - Pandi Ratama</p>
-                                    <p>Dikirimkan jika pembayaran kembali mengalami tunggakan.</p>
-                                    <p className="text-xs text-gray-400">15 Agustus 2025</p>
-                                </div>
-                                {/* Add more roadmap entries here */}
+                            <div className="space-y-2 relative ml-7 border-l-4 border-yellow-400 text-sm">
+                                {roadmapList
+                                .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))
+                                .map((item, idx) => (
+                                    <div key={idx} className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-yelloe-500 transition duration-200">
+                                        <div className="absolute -left-[10.5px] top-0 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white" />
+                                        <p className="text-base font-bold text-yellow-700">{item.jenis_kegiatan}</p>
+                                        <p className="text-gray-600">PPK - {item.ao_input}</p>
+                                        <p className="text-gray-700">{item.keterangan_kegiatan}</p>
+                                        <p className="text-xs text-gray-400">{formatDate(item.tanggal)}</p>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
@@ -213,7 +207,7 @@ export default function DetailFasilitas() {
                                 .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))
                                 .map((item, idx) => (
                                     <div key={idx} className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-blue-500 transition duration-200">
-                                        <div className="absolute -left-[11px] top-1 w-4 h-4 bg-blue-400 rounded-full border-2 border-white" />
+                                        <div className="absolute -left-[10.5px] top-0 w-4 h-4 bg-blue-400 rounded-full border-2 border-white" />
                                         <p className="text-base font-bold text-blue-700">{item.jenis_kegiatan}</p>
                                         <p className="text-gray-600">PPK - {item.ao_input}</p>
                                         <p className="text-gray-700">{item.keterangan_kegiatan}</p>
@@ -239,40 +233,6 @@ export default function DetailFasilitas() {
                                             </button>
                                     </div>
                                 ))}
-                            </div>
-                            <div className="space-y-0 text-sm">
-                                {historyList
-                                    .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))
-                                    .map((item, idx) => (
-                                        <div
-                                            key={idx}
-                                            className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-blue-500 transition duration-200"
-                                        >
-                                            <p className="font-semibold text-red-700">📍 {item.jenis_kegiatan}</p>
-                                            <p className="text-gray-600">PPK - {item.ao_input}</p>
-                                            <p className="text-sm">{item.keterangan_kegiatan}</p>
-                                            <p className="text-xs text-gray-400">{formatDate(item.tanggal)}</p>
-
-                                            {/* Tombol Hapus */}
-                                            <button
-                                                onClick={async () => {
-                                                    const confirmDelete = confirm("Yakin ingin menghapus event ini?");
-                                                    if (!confirmDelete) return;
-                                                    try {
-                                                        const token = localStorage.getItem("token");
-                                                        await deleteHistory(item.event_history_id, token);
-                                                        toast.success("Event berhasil dihapus");
-                                                        fetchHistory(fasilitas.deal_ref, setHistoryList);
-                                                    } catch (err) {
-                                                        toast.error("Gagal menghapus event");
-                                                    }
-                                                }}
-                                                className="absolute top-2 right-3 text-red-500 hover:text-red-700 text-sm font-bold"
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
-                                    ))}
                             </div>
                         </div>
                     )}
