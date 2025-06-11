@@ -1,5 +1,5 @@
 export const deleteHistory = async (event_history_id, token) => {
-  const base_url = 'https://726c-210-210-144-170.ngrok-free.app';
+  const base_url = 'https://2b07-210-210-144-170.ngrok-free.app';
 
   try {
     const response = await fetch(`${base_url}/history/${event_history_id}`, {

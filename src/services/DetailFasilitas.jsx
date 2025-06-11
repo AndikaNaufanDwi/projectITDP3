@@ -1,6 +1,6 @@
 export const fetchFasilitasDetail = async (dealRef, setData) => {
   const token = localStorage.getItem('token');
-  const base_url = 'https://726c-210-210-144-170.ngrok-free.app';
+  const base_url = 'https://2b07-210-210-144-170.ngrok-free.app';
 
   try {
     const res = await fetch(`${base_url}/fasilitas/${dealRef}`, {

@@ -9,6 +9,7 @@ import { fetchRoadmap } from "./services/GetRoadmap";
 import { tambahHistory } from "./services/TambahHistory";
 import { deleteHistory } from './services/HapusHistory';
 import { toast, Bounce } from "react-toastify";
+import { downloadDocxFile } from "./services/AutoRekap";
 
 export default function DetailFasilitas() {
     const [activeTab, setActiveTab] = useState('history');
@@ -58,6 +59,14 @@ export default function DetailFasilitas() {
         }
     };
 
+    const handleDownload = async () => {
+  try {
+    await downloadDocxFile(fasilitas.cif); 
+  } catch (err) {
+    alert("Gagal mendownload file.");
+  }
+};
+
     useEffect(() => {
         if (dealRef) {
             fetchFasilitasDetail(dealRef, setFasilitas);
@@ -84,7 +93,7 @@ export default function DetailFasilitas() {
                             <h1 className="text-2xl font-bold">{fasilitas.nama_perusahaan}</h1>
                             <p className="text-sm text-gray-500">CIF {fasilitas.cif}</p>
                         </div>
-                        <button className="bg-yellow-400 px-6 py-2 rounded font-bold">Auto Rekap</button>
+                        <button onClick={handleDownload} className="bg-yellow-400 px-6 py-2 rounded font-bold">Auto Rekap</button>
                     </div>
 
                     {/* Loan Detail Section */}

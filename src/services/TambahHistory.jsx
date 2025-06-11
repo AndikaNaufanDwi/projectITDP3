@@ -1,5 +1,5 @@
 export const tambahHistory = async ({ token, data }) => {
-  const BASE_URL = 'https://726c-210-210-144-170.ngrok-free.app';
+  const BASE_URL = 'https://2b07-210-210-144-170.ngrok-free.app';
 
   const response = await fetch(`${BASE_URL}/history`, {
     method: 'POST',

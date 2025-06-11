@@ -66,7 +66,7 @@ export default function FasilitasPage() {
             onChange={(e) => setSortOrder(e.target.value)}
             className="border px-1 py-2 rounded text-sm"
           >
-            <option value="">Clear</option>
+            <option value=""></option>
             <option value="az">A to Z</option>
             <option value="za">Z to A</option>
           </select>

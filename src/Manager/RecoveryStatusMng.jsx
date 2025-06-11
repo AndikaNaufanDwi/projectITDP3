@@ -67,6 +67,7 @@ export default function RecoveryPlanDetailPage() {
           </div>
         ))}
       </div>
+      
     </Layout>
   );
 }

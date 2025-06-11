@@ -1,9 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { FaEdit } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { fetchDraftPlans } from '../services/Manager/GetDraftPlans';
 
 export default function RecoveryPlanStatusPage() {
   const navigate = useNavigate();
+
+    const [draftPlans, setDraftPlans] = useState([]);
+
+    useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetchDraftPlans(token, setDraftPlans);
+  }, []);
+
 
   const data = [
     {
@@ -39,20 +49,20 @@ export default function RecoveryPlanStatusPage() {
               <th className="px-6 py-3">Nama Staff</th>
               <th className="px-6 py-3">Perusahaan</th>
               <th className="px-6 py-3">Jam Pengajuan</th>
-              <th className="px-6 py-3">Nominal Kredit Macet</th>
+              <th className="px-6 py-3">Nominal Outstanding</th>
               <th className="px-6 py-3">Status</th>
             </tr>
           </thead>
           <tbody>
-            {data.map((row) => (
-              <tr key={row.id} className="border-b">
-                <td className="px-6 py-3">{row.staff}</td>
-                <td className="px-6 py-3">{row.company}</td>
-                <td className="px-6 py-3">{row.time}</td>
-                <td className="px-6 py-3">{row.amount}</td>
+            {draftPlans.map((plan, index) => (
+              <tr key={index} className="border-b">
+                <td className="px-6 py-3">{plan.created_by.name}</td>
+                <td className="px-6 py-3">{plan.deal_ref}</td>
+                <td className="px-6 py-3">{formatToWIBDate(plan.created_at)}</td>
+                <td className="px-6 py-3">{plan.amount}</td>
                 <td className="px-6 py-3">
                   <button
-                    onClick={() => navigate(`/recovery/${row.id}`)}
+                    onClick={() => navigate(`/recovery/${plan.id}`)}
                     className="text-yellow-500 hover:text-yellow-600 text-lg"
                   >
                     <FaEdit />
@@ -66,3 +76,15 @@ export default function RecoveryPlanStatusPage() {
     </Layout>
   );
 }
+
+const formatToWIBDate = (utcString) => {
+  const utcDate = new Date(utcString);
+  
+  const wibDate = new Date(utcDate.getTime() + (7 * 60 * 60 * 1000));
+
+  const day = String(wibDate.getDate()).padStart(2, '0');
+  const month = String(wibDate.getMonth() + 1).padStart(2, '0');
+  const year = wibDate.getFullYear();
+
+  return `${day}/${month}/${year} - ${String(wibDate.getHours()).padStart(2, '0')}:${String(wibDate.getMinutes()).padStart(2, '0')} WIB`;
+};

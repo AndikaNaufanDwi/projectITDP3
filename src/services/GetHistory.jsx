@@ -1,5 +1,5 @@
 export const fetchHistory = async (dealRef, setHistoryList) => {
-  const base_url = 'https://726c-210-210-144-170.ngrok-free.app';
+  const base_url = 'https://2b07-210-210-144-170.ngrok-free.app';
   const token = localStorage.getItem('token'); 
 
   try {
