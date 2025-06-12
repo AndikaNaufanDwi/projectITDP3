@@ -9,6 +9,7 @@ import { fetchRoadmap } from "./services/GetRoadmap";
 import { tambahHistory } from "./services/TambahHistory";
 import { deleteHistory } from './services/HapusHistory';
 import { toast, Bounce } from "react-toastify";
+import { uploadImage } from "./services/UploadImage";
 import { downloadDocxFile } from "./services/AutoRekap";
 
 export default function DetailFasilitas() {
@@ -16,8 +17,10 @@ export default function DetailFasilitas() {
     const [showModal, setShowModal] = useState(false);
     const { dealRef } = useParams();
     const [fasilitas, setFasilitas] = useState(null);
+
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [editedAgunan, setEditedAgunan] = useState([]);
+
     const [historyList, setHistoryList] = useState([]);
     const [roadmapList, setRoadmapList] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,6 +28,10 @@ export default function DetailFasilitas() {
     const [eventName, setEventName] = useState("");
     const [eventDesc, setEventDesc] = useState("");
     const [eventDate, setEventDate] = useState("");
+
+    const [file, setFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const [eventImage, setEventImage] = useState(null);
 
     const closeModal = () => {
         setShowModal(false);
@@ -35,11 +42,17 @@ export default function DetailFasilitas() {
 
     const handleEventSubmit = async (e) => {
         e.preventDefault();
-
         if (isSubmitting) return;
+
+        setIsSubmitting(true);
         const token = localStorage.getItem('token');
 
         try {
+            let imageUrl = "";
+            if (eventImage) {
+                imageUrl = await uploadImage(eventImage);
+            }
+
             await tambahHistory({
                 token,
                 data: {
@@ -48,24 +61,49 @@ export default function DetailFasilitas() {
                     keterangan_kegiatan: eventDesc,
                     tanggal: eventDate,
                     ao_input: 1,
+                    gambar: imageUrl,
                 },
             });
 
             toast.success('Event berhasil ditambahkan!');
             setShowModal(false);
             fetchHistory(dealRef, setHistoryList);
+
+            setEventName("");
+            setEventDesc("");
+            setEventDate("");
+            setEventImage(null);
+            setPreviewUrl(""); 
         } catch (err) {
+            console.error('Error saat submit event:', err);
             toast.error('Gagal menambahkan event');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const handleDownload = async () => {
-  try {
-    await downloadDocxFile(fasilitas.cif); 
-  } catch (err) {
-    alert("Gagal mendownload file.");
-  }
-};
+        try {
+            await downloadDocxFile(fasilitas.cif);
+        } catch (err) {
+            alert("Gagal mendownload file.");
+        }
+    };
+
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
+    };
+
+    const handleUpload = async () => {
+        if (!file) return;
+        try {
+            const url = await uploadImage(file);
+            setPreviewUrl(url);
+            alert("Upload berhasil!");
+        } catch (err) {
+            alert("Gagal upload gambar");
+        }
+    };
 
     useEffect(() => {
         if (dealRef) {
@@ -188,16 +226,16 @@ export default function DetailFasilitas() {
 
                             <div className="space-y-2 relative ml-7 border-l-4 border-yellow-400 text-sm">
                                 {roadmapList
-                                .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))
-                                .map((item, idx) => (
-                                    <div key={idx} className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-yellow-500 transition duration-200">
-                                        <div className="absolute -left-[10.5px] top-0 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white" />
-                                        <p className="text-base font-bold text-yellow-700">{item.jenis_kegiatan}</p>
-                                        <p className="text-gray-600">{item.keterangan}</p>
-                                        <p className="text-gray-700">{item.plan}</p>
-                                        <p className="text-xs text-gray-400">{formatDate(item.tanggal)}</p>
-                                    </div>
-                                ))}
+                                    .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))
+                                    .map((item, idx) => (
+                                        <div key={idx} className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-yellow-500 transition duration-200">
+                                            <div className="absolute -left-[10.5px] top-0 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white" />
+                                            <p className="text-base font-bold text-yellow-700">{item.jenis_kegiatan}</p>
+                                            <p className="text-gray-600">{item.keterangan}</p>
+                                            <p className="text-gray-700">{item.plan}</p>
+                                            <p className="text-xs text-gray-400">{formatDate(item.tanggal)}</p>
+                                        </div>
+                                    ))}
                             </div>
                         </div>
                     )}
@@ -205,7 +243,14 @@ export default function DetailFasilitas() {
                     {activeTab === 'history' && (
                         <div>
                             <button
-                                onClick={() => setShowModal(true)}
+                                onClick={() => {
+                                    setShowModal(true);
+                                    setEventName("");
+                                    setEventDesc("");
+                                    setEventDate("");
+                                    setEventImage(null);
+                                    setPreviewUrl("");
+                                }}
                                 className="mb-4 bg-blue-900 text-white px-4 py-2 rounded text-sm"
                             >
                                 Tambah Event
@@ -214,17 +259,17 @@ export default function DetailFasilitas() {
 
                             <div className="space-y-2 relative ml-7 border-l-4 border-blue-400 text-sm">
                                 {historyList
-                                .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))
-                                .map((item, idx) => (
-                                    <div key={idx} className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-blue-500 transition duration-200">
-                                        <div className="absolute -left-[10.5px] top-0 w-4 h-4 bg-blue-400 rounded-full border-2 border-white" />
-                                        <p className="text-base font-bold text-blue-700">{item.jenis_kegiatan}</p>
-                                        <p className="text-gray-600">PPK - {item.ao_input}</p>
-                                        <p className="text-gray-700">{item.keterangan_kegiatan}</p>
-                                        <p className="text-xs text-gray-400">{formatDate(item.tanggal)}</p>
+                                    .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))
+                                    .map((item, idx) => (
+                                        <div key={idx} className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-blue-500 transition duration-200">
+                                            <div className="absolute -left-[10.5px] top-0 w-4 h-4 bg-blue-400 rounded-full border-2 border-white" />
+                                            <p className="text-base font-bold text-blue-700">{item.jenis_kegiatan}</p>
+                                            <p className="text-gray-600">PPK - {item.ao_input}</p>
+                                            <p className="text-gray-700">{item.keterangan_kegiatan}</p>
+                                            <p className="text-xs text-gray-400">{formatDate(item.tanggal)}</p>
 
-                                        {/* Tombol Hapus */}
-                                        <button
+                                            {/* Tombol Hapus */}
+                                            <button
                                                 onClick={async () => {
                                                     const confirmDelete = confirm("Yakin ingin menghapus event ini?");
                                                     if (!confirmDelete) return;
@@ -241,8 +286,8 @@ export default function DetailFasilitas() {
                                             >
                                                 ✕
                                             </button>
-                                    </div>
-                                ))}
+                                        </div>
+                                    ))}
                             </div>
                         </div>
                     )}
@@ -250,24 +295,27 @@ export default function DetailFasilitas() {
             </div>
             {showModal && (
                 <div className="fixed inset-0 z-50 flex justify-center items-center bg-white/10 backdrop-blur-md">
-                    <div className="bg-white w-[90%] max-w-md rounded-lg shadow-lg p-6 relative">
-                        {/* Close Button */}
-                        <button
-                            className="absolute top-2 right-3 text-xl text-gray-500 hover:text-gray-700"
-                            onClick={() => setShowModal(false)}
-                        >
-                            ✕
-                        </button>
+                    <div className="bg-white rounded-xl shadow-lg w-full max-w-xl overflow-hidden">
+                        {/* Header */}
+                        <div className="bg-teal-500 text-white px-6 py-4 flex justify-between items-center">
+                            <h2 className="text-lg font-bold">Tambah History</h2>
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="text-white text-2xl leading-none hover:text-red-200"
+                            >
+                                &times;
+                            </button>
+                        </div>
 
                         {/* Modal Content */}
-                        <h2 className="text-lg font-bold text-teal-600 mb-4">Event Baru ({activeTab === 'roadmap' ? 'Roadmap' : 'History'})</h2>
-                        <form className="space-y-4" onSubmit={handleEventSubmit}>
+                        <form className="p-6 space-y-4 max-h-96 overflow-y-auto" onSubmit={handleEventSubmit}>
                             <div>
                                 <label className="block text-sm font-medium">Nama Event</label>
                                 <input
                                     type="text"
                                     value={eventName}
                                     onChange={e => setEventName(e.target.value)}
+                                    required
                                     className="border w-full px-3 py-2 rounded mt-1"
                                     placeholder="-"
                                 />
@@ -278,6 +326,7 @@ export default function DetailFasilitas() {
                                     type="text"
                                     value={eventDesc}
                                     onChange={e => setEventDesc(e.target.value)}
+                                    required
                                     className="border w-full px-3 py-2 rounded mt-1"
                                     placeholder="-"
                                 />
@@ -288,9 +337,42 @@ export default function DetailFasilitas() {
                                     type="date"
                                     value={eventDate}
                                     onChange={e => setEventDate(e.target.value)}
+                                    required
                                     className="border w-full px-3 py-2 rounded mt-1"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Upload Gambar</label>
+
+                                <div className="flex items-center space-x-4">
+                                    <label className="cursor-pointer inline-block bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600 transition">
+                                        Pilih Gambar
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => setEventImage(e.target.files[0])}
+                                            required
+                                            className="hidden"
+                                        />
+                                    </label>
+
+                                    {eventImage && (
+                                        <span className="text-sm text-gray-700">{eventImage.name}</span>
+                                    )}
+                                </div>
+
+                                {eventImage && (
+                                    <div className="mt-3">
+                                        <p className="text-xs text-gray-500 mb-1">Preview:</p>
+                                        <img
+                                            src={URL.createObjectURL(eventImage)}
+                                            alt="Preview"
+                                            className="w-full max-h-64 object-contain border rounded"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
