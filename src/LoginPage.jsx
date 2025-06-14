@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const base_url = 'https://2b07-210-210-144-170.ngrok-free.app';
+  const base_url = 'https://a3f8-202-146-38-197.ngrok-free.app';
 
   const handleLogin = async (e) => {
     e.preventDefault();

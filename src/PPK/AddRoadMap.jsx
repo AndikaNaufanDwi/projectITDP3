@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { fetchPerusahaan } from '../services/FetchPerusahaan';
+import { fetchFasilitasByCIF } from '../services/FasilitasCIF';
 
 export default function NewRoadmapModal({ onClose }) {
   const [step, setStep] = useState(1);
@@ -31,6 +33,27 @@ export default function NewRoadmapModal({ onClose }) {
     setForm({ ...form, roadmap: updated });
   };
 
+  const [companies, setCompanies] = useState([]);
+  const [selectedCif, setSelectedCif] = useState('');
+
+  const [dealRefList, setDealRefList] = useState([]);
+  const [selectedDealRef, setSelectedDealRef] = useState('');
+
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetchPerusahaan(setCompanies, token);
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (selectedCif) {
+      fetchFasilitasByCIF(selectedCif, setDealRefList, token);
+    } else {
+      setDealRefList([]);
+    }
+  }, [selectedCif]);
+
   const handleSubmit = () => {
     console.log('Form submitted:', form);
     onClose();
@@ -56,32 +79,39 @@ export default function NewRoadmapModal({ onClose }) {
           {step === 1 ? (
             <>
               <div>
-                <label className="block font-semibold mb-1">Nama Perusahaan</label>
-                <input
-                  type="text"
-                  value={form.perusahaan}
-                  onChange={(e) => setForm({ ...form, perusahaan: e.target.value })}
+                <label className="block font-semibold mb-1">Pilih CIF</label>
+                <select
+                  value={selectedCif}
+                  onChange={(e) => setSelectedCif(e.target.value)}
                   className="w-full border px-4 py-2 rounded"
-                />
+                  required
+                >
+                  <option value="" disabled>CIF</option>
+                  {companies.map((company, i) => (
+                    <option key={i} value={company.cif}>
+                      {company.cif} - {company.nama_perusahaan}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div>
-                <label className="block font-semibold mb-1">Nominal Kredit Macet</label>
-                <input
-                  type="text"
-                  value={form.nominal}
-                  onChange={(e) => setForm({ ...form, nominal: e.target.value })}
-                  className="w-full border px-4 py-2 rounded"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold mb-1">Tanggal</label>
-                <input
-                  type="date"
-                  value={form.tanggalAwal}
-                  onChange={(e) => setForm({ ...form, tanggalAwal: e.target.value })}
-                  className="w-full border px-4 py-2 rounded"
-                />
-              </div>
+              {selectedCif && (
+                <div>
+                  <label className="block font-semibold mb-1">Deal Ref</label>
+                  <select
+                    value={selectedDealRef}
+                    onChange={(e) => setSelectedDealRef(e.target.value)}
+                    className="w-full border px-4 py-2 rounded"
+                    required
+                  >
+                    <option value="">-- Pilih Deal Ref --</option>
+                    {dealRefList.map((deal, idx) => (
+                      <option key={idx} value={deal.deal_ref}>
+                        {deal.deal_ref}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="text-right">
                 <button
                   onClick={() => setStep(2)}

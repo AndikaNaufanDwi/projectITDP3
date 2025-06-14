@@ -61,7 +61,7 @@ export default function DetailFasilitas() {
                     keterangan_kegiatan: eventDesc,
                     tanggal: eventDate,
                     ao_input: 1,
-                    gambar: imageUrl,
+                    image: eventImage,
                 },
             });
 
