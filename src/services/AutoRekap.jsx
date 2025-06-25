@@ -1,6 +1,6 @@
 export const downloadDocxFile = async (cif) => {
   const token = localStorage.getItem("token");
-  const base_url = "https://a3f8-202-146-38-197.ngrok-free.app";
+  const base_url = "https://2dbc-182-253-124-143.ngrok-free.app/";
 
   try {
     const response = await fetch(`${base_url}/perusahaan/${cif}/docx`, {

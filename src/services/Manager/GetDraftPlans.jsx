@@ -1,12 +1,12 @@
-export const fetchDraftPlans = async (token, setPlans) => {
-  const base_url = 'https://a3f8-202-146-38-197.ngrok-free.app'; 
+export const fetchDraftPlans = async (token) => {
+  const base_url = 'https://2dbc-182-253-124-143.ngrok-free.app/';
 
   try {
     const response = await fetch(`${base_url}/roadmap-plans`, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': '69420' 
+        'ngrok-skip-browser-warning': '69420'
       },
     });
 
@@ -16,9 +16,9 @@ export const fetchDraftPlans = async (token, setPlans) => {
       throw new Error(data.message || 'Gagal fetch draft plans');
     }
 
-    const draftOnly = data.filter(plan => plan.status === "Draft");
-    setPlans(draftOnly);
+    return data.filter(plan => plan.status === "Pending" || plan.status === "Rejected");
   } catch (err) {
     console.error("Fetch Draft Plans Error:", err);
+    return [];
   }
 };

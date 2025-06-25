@@ -9,8 +9,9 @@ import { fetchRoadmap } from "./services/GetRoadmap";
 import { tambahHistory } from "./services/TambahHistory";
 import { deleteHistory } from './services/HapusHistory';
 import { toast, Bounce } from "react-toastify";
-import { uploadImage } from "./services/UploadImage";
 import { downloadDocxFile } from "./services/AutoRekap";
+import { FaTrash, FaEdit } from "react-icons/fa";
+
 
 export default function DetailFasilitas() {
     const [activeTab, setActiveTab] = useState('history');
@@ -28,10 +29,15 @@ export default function DetailFasilitas() {
     const [eventName, setEventName] = useState("");
     const [eventDesc, setEventDesc] = useState("");
     const [eventDate, setEventDate] = useState("");
+    const [eventStatus, setEventStatus] = useState("");
+
 
     const [file, setFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState("");
     const [eventImage, setEventImage] = useState(null);
+
+    const [editMode, setEditMode] = useState(false);
+    const [editingEvent, setEditingEvent] = useState(null);
 
     const closeModal = () => {
         setShowModal(false);
@@ -44,15 +50,16 @@ export default function DetailFasilitas() {
         e.preventDefault();
         if (isSubmitting) return;
 
+        if (!eventImage && !editMode) {
+            toast.error("Mohon pilih gambar terlebih dahulu");
+            setIsSubmitting(false);
+            return;
+        }
+
         setIsSubmitting(true);
         const token = localStorage.getItem('token');
 
         try {
-            let imageUrl = "";
-            if (eventImage) {
-                imageUrl = await uploadImage(eventImage);
-            }
-
             await tambahHistory({
                 token,
                 data: {
@@ -62,6 +69,7 @@ export default function DetailFasilitas() {
                     tanggal: eventDate,
                     ao_input: 1,
                     image: eventImage,
+                    status: eventStatus,
                 },
             });
 
@@ -69,17 +77,21 @@ export default function DetailFasilitas() {
             setShowModal(false);
             fetchHistory(dealRef, setHistoryList);
 
+            // Reset
             setEventName("");
             setEventDesc("");
             setEventDate("");
             setEventImage(null);
-            setPreviewUrl(""); 
+            setEventStatus("");
+            setPreviewUrl("");
+            setEditMode(false);
+            setEditingEvent(null);
         } catch (err) {
             console.error('Error saat submit event:', err);
             toast.error('Gagal menambahkan event');
         } finally {
             setIsSubmitting(false);
-        }
+        } 
     };
 
     const handleDownload = async () => {
@@ -92,17 +104,6 @@ export default function DetailFasilitas() {
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
-    };
-
-    const handleUpload = async () => {
-        if (!file) return;
-        try {
-            const url = await uploadImage(file);
-            setPreviewUrl(url);
-            alert("Upload berhasil!");
-        } catch (err) {
-            alert("Gagal upload gambar");
-        }
     };
 
     useEffect(() => {
@@ -121,8 +122,14 @@ export default function DetailFasilitas() {
         );
     }
 
+    const breadcrumbs = [
+  { label: 'Companies', path: '/fasilitas' },
+  { label: fasilitas?.nama_perusahaan || 'Detail Perusahaan', path: `/fasilitas/company-detail/${fasilitas?.cif || ''}` },
+  { label: fasilitas?.deal_ref || 'Detail Fasilitas', path: `/fasilitas/facility-detail/${fasilitas?.deal_ref || ''}` }
+];
+
     return (
-        <Layout title="Detail Fasilitas">
+        <Layout title="Detail Fasilitas" breadcrumbs={breadcrumbs}>
             <div className="flex min-h-screen bg-gray-50 text-gray-800">
                 <div className="flex-1 p-6 space-y-6">
                     {/* Header */}
@@ -231,8 +238,8 @@ export default function DetailFasilitas() {
                                         <div key={idx} className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-yellow-500 transition duration-200">
                                             <div className="absolute -left-[10.5px] top-0 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white" />
                                             <p className="text-base font-bold text-yellow-700">{item.jenis_kegiatan}</p>
-                                            <p className="text-gray-600">{item.keterangan}</p>
-                                            <p className="text-gray-700">{item.plan}</p>
+                                            <p className="text-gray-600">{item.ao_input}</p>
+                                            <p className="text-gray-700">{item.keterangan}</p>
                                             <p className="text-xs text-gray-400">{formatDate(item.tanggal)}</p>
                                         </div>
                                     ))}
@@ -263,32 +270,59 @@ export default function DetailFasilitas() {
                                     .map((item, idx) => (
                                         <div key={idx} className="relative rounded p-3 bg-gray-50 border border-transparent hover:border hover:border-blue-500 transition duration-200">
                                             <div className="absolute -left-[10.5px] top-0 w-4 h-4 bg-blue-400 rounded-full border-2 border-white" />
+
                                             <p className="text-base font-bold text-blue-700">{item.jenis_kegiatan}</p>
                                             <p className="text-gray-600">PPK - {item.ao_input}</p>
                                             <p className="text-gray-700">{item.keterangan_kegiatan}</p>
                                             <p className="text-xs text-gray-400">{formatDate(item.tanggal)}</p>
 
-                                            {/* Tombol Hapus */}
-                                            <button
-                                                onClick={async () => {
-                                                    const confirmDelete = confirm("Yakin ingin menghapus event ini?");
-                                                    if (!confirmDelete) return;
-                                                    try {
-                                                        const token = localStorage.getItem("token");
-                                                        await deleteHistory(item.event_history_id, token);
-                                                        toast.success("Event berhasil dihapus");
-                                                        fetchHistory(fasilitas.deal_ref, setHistoryList);
-                                                    } catch (err) {
-                                                        toast.error("Gagal menghapus event");
-                                                    }
-                                                }}
-                                                className="absolute top-2 right-3 text-red-500 hover:text-red-700 text-sm font-bold"
-                                            >
-                                                ✕
-                                            </button>
+                                            {item.image && (
+                                                <div className="mt-3">
+                                                    <p className="text-xs text-gray-500 mb-1">Dokumentasi:</p>
+                                                    <img
+                                                        src={item.image}
+                                                        alt="Dokumentasi"
+                                                        className="w-40 md:w-56 h-auto object-contain border rounded shadow"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* Tombol Update & Hapus */}
+                                            <div className="absolute top-2 right-3 flex space-x-2">
+                                                <FaEdit
+                                                    className="cursor-pointer text-blue-500 hover:text-blue-700"
+                                                    onClick={() => {
+                                                        setEditMode(true);
+                                                        setEditingEvent(item);
+                                                        setShowModal(true);
+                                                        setEventName(item.jenis_kegiatan);
+                                                        setEventDesc(item.keterangan_kegiatan);
+                                                        setEventDate(formatDateForInput(item.tanggal));
+                                                        setPreviewUrl(item.image);
+                                                        setEventImage(null);
+                                                    }}
+                                                />
+                                                <FaTrash
+                                                    className="cursor-pointer text-red-500 hover:text-red-700"
+                                                    onClick={async () => {
+                                                        const confirmDelete = confirm("Yakin ingin menghapus event ini?");
+                                                        if (!confirmDelete) return;
+                                                        try {
+                                                            const token = localStorage.getItem("token");
+                                                            await deleteHistory(item.event_history_id, token);
+                                                            toast.success("Event berhasil dihapus");
+                                                            fetchHistory(fasilitas.deal_ref, setHistoryList);
+                                                        } catch (err) {
+                                                            toast.error("Gagal menghapus event");
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+
                                         </div>
                                     ))}
                             </div>
+
                         </div>
                     )}
                 </div>
@@ -342,6 +376,19 @@ export default function DetailFasilitas() {
                                 />
                             </div>
                             <div>
+  <label className="block text-sm font-medium">Status</label>
+  <select
+    value={eventStatus}
+    onChange={e => setEventStatus(e.target.value)}
+    required
+    className="border w-full px-3 py-2 rounded mt-1"
+  >
+    <option value="">Pilih status</option>
+    <option value="Berhasil">Berhasil</option>
+    <option value="Gagal">Gagal</option>
+  </select>
+</div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Upload Gambar</label>
 
                                 <div className="flex items-center space-x-4">
@@ -351,7 +398,6 @@ export default function DetailFasilitas() {
                                             type="file"
                                             accept="image/*"
                                             onChange={(e) => setEventImage(e.target.files[0])}
-                                            required
                                             className="hidden"
                                         />
                                     </label>
@@ -361,11 +407,11 @@ export default function DetailFasilitas() {
                                     )}
                                 </div>
 
-                                {eventImage && (
+                                {(eventImage || previewUrl) && (
                                     <div className="mt-3">
                                         <p className="text-xs text-gray-500 mb-1">Preview:</p>
                                         <img
-                                            src={URL.createObjectURL(eventImage)}
+                                            src={eventImage ? URL.createObjectURL(eventImage) : previewUrl}
                                             alt="Preview"
                                             className="w-full max-h-64 object-contain border rounded"
                                         />
@@ -378,7 +424,7 @@ export default function DetailFasilitas() {
                                 disabled={isSubmitting}
                                 className={`bg-teal-500 text-white px-4 py-2 rounded w-full mt-4 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                {isSubmitting ? 'Mengirim...' : 'Submit'}
+                                {isSubmitting ? 'Mengirim...' : (editMode ? 'Update' : 'Submit')}
                             </button>
                         </form>
                     </div>
@@ -425,7 +471,6 @@ export default function DetailFasilitas() {
         </Layout>
 
     );
-
 }
 
 const formatRupiah = (number) => {
@@ -439,4 +484,10 @@ const formatRupiah = (number) => {
 const formatDate = (dateStr) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
+
+const formatDateForInput = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toISOString().split("T")[0];
 };

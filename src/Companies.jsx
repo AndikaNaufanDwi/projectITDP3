@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import Layout from './components/Layout';
 import { useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash } from 'react-icons/fa';
 import { fetchPerusahaan } from './services/FetchPerusahaan';
 import { submitPerusahaan } from './services/TambahPerusahaan';
+import { HoverEffect } from './components/ui/HoverEffect';
+import { CompanyCard } from './components/CompaniesCard';
 
 export default function FasilitasPage() {
   const navigate = useNavigate();
@@ -17,9 +18,12 @@ export default function FasilitasPage() {
   const [companies, setCompanies] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const handleClick = (company) => {
-    navigate('/fasilitas/company-detail', { state: company });
-  };
+
+const handleClick = (company) => {
+  navigate(`/fasilitas/company-detail/${company.cif}`, {
+    state: company,
+  });
+};
 
   useEffect(() => {
     fetchPerusahaan(setCompanies).finally(() => setLoading(false));
@@ -57,8 +61,22 @@ export default function FasilitasPage() {
     return 0;
   });
 
+  const hoverEffectItems = sortedCompanies.map((company) => ({
+    link: `/fasilitas/company-detail/${company.cif}`,
+    content: (
+      <CompanyCard
+        company={company}
+        onClick={() => handleClick(company)}
+        onEdit={(e) => handleEdit(company, e)}
+        onDelete={(e) => handleDelete(company, e)}
+      />
+    ),
+  }));
+
+  const breadcrumbs = [{ label: 'Companies', path: '/fasilitas' }];
+
   return (
-    <Layout title="Companies">
+    <Layout title="Companies" breadcrumbs={[{ label: 'Companies', path: '/fasilitas' }]} >
       <div className="flex flex-wrap justify-between items-center mb-4 px-2">
         <div className="relative inline-block">
           <select
@@ -82,17 +100,17 @@ export default function FasilitasPage() {
       </div>
 
       <div className="flex justify-end px-4 mb-4">
-        <button
+        {/* <button
           onClick={() => setShowModal(true)}
           className="bg-blue-800 text-white px-4 py-2 rounded text-sm"
         >
           Tambah Perusahaan
-        </button>
-
+        </button> */}
+        {/* }
         {showModal && (
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-xl overflow-hidden">
-              {/* Header */}
+
               <div className="bg-teal-500 text-white px-6 py-4 flex justify-between items-center">
                 <h2 className="text-lg font-bold">Tambah Perusahaan</h2>
                 <button
@@ -103,7 +121,6 @@ export default function FasilitasPage() {
                 </button>
               </div>
 
-              {/* Form Content */}
               <div className="p-6 space-y-4">
                 <div>
                   <input
@@ -145,7 +162,6 @@ export default function FasilitasPage() {
                   />
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex justify-end space-x-3">
                   <button
                     onClick={() => setShowModal(false)}
@@ -163,35 +179,36 @@ export default function FasilitasPage() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
 
       {loading ? (
-        <p className="text-center text-sm text-gray-500">Loading...</p>
-      ) : (
         <div className="space-y-4">
-          {sortedCompanies.map((company, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              onClick={() => handleClick(company)}
-              className="bg-white shadow-sm rounded w-[95%] mx-auto p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+              className="animate-pulse bg-white shadow-sm rounded w-[95%] mx-auto p-4 flex justify-between items-center"
             >
-              <div>
-                <p className="font-bold">{company.nama_perusahaan}</p>
-                <p className="text-sm">{company.kantor_wilayah}</p>
-                <p className="text-sm">{company.kantor_cabang}</p>
-                <p className="text-xs text-gray-400">CIF: {company.cif}</p>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-48" />
+                <div className="h-3 bg-gray-200 rounded w-32" />
+                <div className="h-3 bg-gray-200 rounded w-24" />
+                <div className="h-2 bg-gray-200 rounded w-40" />
               </div>
-
-              <div
-                className="flex space-x-4 text-gray-500"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <FaEdit className="cursor-pointer hover:text-blue-600" />
-                <FaTrash className="cursor-pointer hover:text-red-600" />
+              <div className="flex space-x-4">
+                <div className="h-5 w-5 bg-gray-200 rounded" />
+                <div className="h-5 w-5 bg-gray-200 rounded" />
               </div>
             </div>
           ))}
+        </div>
+      ) : (
+        <div className="px-2">
+          {sortedCompanies.length > 0 ? (
+           <HoverEffect items={hoverEffectItems} className="max-w-7xl mx-auto" />
+          ) : (
+            <p className="text-center text-gray-500 py-10">No companies found matching your criteria.</p>
+          )}
         </div>
       )}
     </Layout>

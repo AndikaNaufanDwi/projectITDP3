@@ -1,4 +1,4 @@
-const base_url = 'https://a3f8-202-146-38-197.ngrok-free.app';
+const base_url = 'https://2dbc-182-253-124-143.ngrok-free.app/';
 
 export const submitPerusahaan = async (data) => {
   const token = localStorage.getItem('token');

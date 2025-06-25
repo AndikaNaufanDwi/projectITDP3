@@ -1,11 +1,14 @@
 export const uploadImage = async (file) => {
   const formData = new FormData();
-  const base_url = 'https://a3f8-202-146-38-197.ngrok-free.app'; 
+  const base_url = 'https://2dbc-182-253-124-143.ngrok-free.app/'; 
   formData.append('image', file);
 
   try {
     const response = await fetch(`${base_url}/upload-image`, {
       method: 'POST',
+      headers: {
+        'ngrok-skip-browser-warning': '69420',
+      },
       body: formData,
     });
 

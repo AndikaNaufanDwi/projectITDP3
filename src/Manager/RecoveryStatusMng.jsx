@@ -1,45 +1,29 @@
 import Layout from '../components/Layout';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { fetchRoadmapEventsById, updateRoadmapStatus } from '../services/Manager/RoadmapServices';
 
 export default function RecoveryPlanDetailPage() {
-  const roadmap = [
-    {
-      title: 'Kunjungan Lapangan',
-      author: 'PPK - Pandi Ratama',
-      detail: 'Verifikasi kondisi usaha/asset debitur di lokasi.',
-      date: '29 Juli 2025',
-    },
-    {
-      title: 'Peringatan Kedua (Jika Gagal Bayar Ulang)',
-      author: 'PPK - Pandi Ratama',
-      detail: 'Dikirimkan jika pembayaran kembali mengalami tunggakan.',
-      date: '15 Agustus 2025',
-    },
-    {
-      title: 'Pelibatan Tim Legal',
-      author: 'PPK - Miti Sarlina',
-      detail: 'Melibatkan bagian hukum untuk opsi litigasi jika tidak ada progres.',
-      date: '25 Agustus 2025',
-    },
-    {
-      title: 'Proses Eksekusi Agunan',
-      author: 'PPK - Miti Sarlina',
-      detail: 'Mulai proses hukum untuk eksekusi jaminan debitur.',
-      date: '10 September 2025',
-    },
-    {
-      title: 'Penyelesaian Akhir',
-      author: '',
-      detail: '',
-      date: '',
-    },
-  ];
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [roadmap, setRoadmap] = useState([]);
+  const [planStatus, setPlanStatus] = useState('');
+  const [events, setEvents] = useState([]);
 
-  const handleAccept = () => {
-    console.log('Accept clicked');
+  useEffect(() => {
+    fetchRoadmapEventsById(id).then(setEvents);
+  }, [id]);
+
+  const handleAccept = async () => {
+    const result = await updateRoadmapStatus(id, 'Accepted');
+    if (result.success) setPlanStatus('Accepted');
+    navigate("/recovery")
   };
 
-  const handleDeny = () => {
-    console.log('Deny clicked');
+  const handleDeny = async () => {
+    const result = await updateRoadmapStatus(id, 'Rejected');
+    if (result.success) setPlanStatus('Rejected');
+    navigate("/recovery");
   };
 
   return (
@@ -55,19 +39,20 @@ export default function RecoveryPlanDetailPage() {
       </div>
 
       {/* Roadmap Timeline */}
-      <h2 className="text-xl font-bold mb-6">Roadmap Recovery NPL</h2>
+      <h2 className="text-xl font-bold mb-2">Status: {planStatus}</h2>
+      <h3 className="text-lg font-semibold mb-6">Roadmap Recovery NPL</h3>
+
       <div className="space-y-10 relative ml-6 border-l-4 border-yellow-400">
-        {roadmap.map((item, index) => (
+        {events.map((item, index) => (
           <div key={index} className="pl-6 relative">
             <div className="absolute -left-[11px] top-0 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white" />
-            <p className="text-lg font-bold text-gray-800 mb-1">{item.title}</p>
-            <p className="text-sm text-gray-600">{item.author}</p>
-            <p className="text-sm text-gray-500">{item.detail}</p>
-            <p className="text-xs text-gray-400">{item.date}</p>
+            <p className="text-lg font-bold text-gray-800 mb-1">{item.jenis_kegiatan}</p>
+            <p className="text-sm text-gray-600">AO ID: {item.ao_input}</p>
+            <p className="text-sm text-gray-500">{item.keterangan_kegiatan}</p>
+            <p className="text-xs text-gray-400">{new Date(item.tanggal).toLocaleDateString('id-ID')}</p>
           </div>
         ))}
       </div>
-      
     </Layout>
   );
 }

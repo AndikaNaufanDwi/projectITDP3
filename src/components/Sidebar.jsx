@@ -1,6 +1,10 @@
 import logoBJB from '../assets/bjb.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import LoadingLineReveal from './ui/LoadingLine';
 import { HomeIcon, BuildingOfficeIcon, DocumentMagnifyingGlassIcon, ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/solid';
+import logoRevino from '../assets/revinoBG.png';
+import { motion } from 'framer-motion';
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const role = localStorage.getItem('role');
@@ -10,13 +14,20 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const isRecoveryActive = location.pathname.startsWith('/recovery');
   const navigate = useNavigate();
 
+  const [loadingLogout, setLoadingLogout] = useState(false);
+
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.clear();
-    navigate('/');
+
+    setTimeout(() => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      navigate('/');
+    }, 300);
   };
+
   return (
+      <>
+
     <aside
       className={`bg-white border-r border-gray-200 flex flex-col items-center w-64 fixed top-0 left-0 h-screen z-55 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 md:h-screen md:z-0`}
     >
@@ -26,12 +37,14 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
         <button className="text-xl" onClick={() => setSidebarOpen(false)}>✕</button>
       </div>
 
-      <img src={logoBJB} alt="bank bjb" className="h-20 mb-10 pt-4" />
-      <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
-      <p className="mb-6 text-sm font-semibold">Halo, user!</p>
+         <div className="py-6 mb-4 border-gray-200 flex justify-center"> 
+        <img src={logoRevino} alt="revino" className="h-25" /> 
+    </div>
+      {/* <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
+      <p className="mb-6 text-sm font-semibold">Halo, user!</p> */}
 
       <nav className="w-full space-y-2 px-4 text-sm">
-        <p>In Development</p>
+        {/* <p>In Development</p>
         <Link
           to="/dashboard"
           className={`py-2 px-3 rounded flex items-center space-x-2 ${isDashboardActive
@@ -97,10 +110,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
           <span>😩</span>
           <span>Recovery Plan Status User</span>
         </Link>
-       
+
 
         {/* TESTING PHASE PART */}
-        <p>Real Sidebar Testing</p>
+        {/* <p>Real Sidebar Testing</p>  */}
         {/* Dasboard Manager */}
         {(role === 'Manager PPK') && (
           <Link
@@ -127,7 +140,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
               : 'text-gray-500 hover:bg-gray-100'
               }`}
           >
-            <span>😴</span>
+            <HomeIcon
+              className={`h-5 w-5 ${isDashboardActive ? 'text-green-800' : 'text-gray-500 group-hover:text-gray-700'
+                }`}
+            />
             <span>Dashboard PPK</span>
           </Link>
         )}
@@ -170,7 +186,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
               : 'text-gray-500 hover:bg-gray-100'
               }`}
           >
-            <span>😩</span>
+            <DocumentMagnifyingGlassIcon className={`h-5 w-5 ${isRecoveryActive ? 'text-green-800' : 'text-gray-500'}`} />
             <span>Recovery Plan Status User</span>
           </Link>
         )}
@@ -184,10 +200,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
           <ArrowLeftEndOnRectangleIcon className="h-5 w-5" />
           <span>Log Out</span>
         </button>
-
       </div>
 
     </aside>
+    </>
   );
 }
 

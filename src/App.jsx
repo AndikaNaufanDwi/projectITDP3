@@ -21,7 +21,7 @@ function App() {
         <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
         <Route path="/recovery" element={<PrivateRoute><RecoveryPlanPageMng /></PrivateRoute>} />
         <Route path="/recovery/:id" element={<PrivateRoute><RecoveryPlanStatusPage /></PrivateRoute>} />
-        <Route path="/fasilitas/company-detail" element={<PrivateRoute><DetailPerusahaan /></PrivateRoute>} />
+        <Route path="/fasilitas/company-detail/:cif" element={<PrivateRoute><DetailPerusahaan /></PrivateRoute>} />
         <Route path="/fasilitas/facility-detail/:dealRef" element={<PrivateRoute><DetailFasilitas /></PrivateRoute>} />
 
         <Route path="/dashboard/ppk" element={<PrivateRoute><DashboardPPK /></PrivateRoute>} />

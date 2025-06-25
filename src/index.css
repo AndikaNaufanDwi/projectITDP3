@@ -1,1 +1,59 @@
 @import "tailwindcss";
+
+:root {
+  --ripple-main-color: #6B46C1; 
+  --ripple-start-opacity: 0.7;
+  --ripple-end-opacity: 0;
+  --ripple-border-thickness: 4px;
+  --ripple-animation-duration: 2s; 
+  --ripple-initial-size: 0px;
+  --ripple-final-size: 100px; 
+  --ripple-ease-function: cubic-bezier(0.25, 0.8, 0.25, 1); 
+}
+
+.ripple-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px; 
+  width: 100px;  
+  position: relative;
+
+  width: 120px;  
+  height: 120px; 
+  margin-left: auto; 
+  margin-right: auto;
+}
+
+.ripple-loader span {
+  position: absolute;
+  border: var(--ripple-border-thickness) solid var(--ripple-main-color);
+  border-radius: 50%;
+  opacity: var(--ripple-start-opacity);
+  animation: ripple var(--ripple-animation-duration) var(--ripple-ease-function) infinite;
+  transform: translate(0, 0); 
+  will-change: transform, opacity; 
+}
+
+/* More ripples for a continuous effect */
+.ripple-loader span:nth-child(2) {
+  animation-delay: calc(var(--ripple-animation-duration) / -3); 
+}
+
+.ripple-loader span:nth-child(3) {
+  animation-delay: calc(var(--ripple-animation-duration) / -1.5); 
+}
+
+
+@keyframes ripple {
+  0% {
+    width: var(--ripple-initial-size);
+    height: var(--ripple-initial-size);
+    opacity: var(--ripple-start-opacity);
+  }
+  100% {
+    width: var(--ripple-final-size);
+    height: var(--ripple-final-size);
+    opacity: var(--ripple-end-opacity);
+  }
+}

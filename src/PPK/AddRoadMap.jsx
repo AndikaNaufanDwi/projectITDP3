@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { fetchPerusahaan } from '../services/FetchPerusahaan';
 import { fetchFasilitasByCIF } from '../services/FasilitasCIF';
+import { submitRoadmapPlan } from '../services/SubmitRoadmapPlans';
+import { toast } from 'react-toastify';
 
 export default function NewRoadmapModal({ onClose }) {
   const [step, setStep] = useState(1);
+
+  const [companies, setCompanies] = useState([]);
+  const [selectedCif, setSelectedCif] = useState('');
+  const [dealRefList, setDealRefList] = useState([]);
+  const [selectedDealRef, setSelectedDealRef] = useState('');
+
   const [form, setForm] = useState({
-    perusahaan: '',
-    nominal: '',
-    tanggalAwal: '',
     roadmap: [
       { kegiatan: '', detail: '', tanggal: '' }
     ]
@@ -15,7 +20,9 @@ export default function NewRoadmapModal({ onClose }) {
 
   const handleRoadmapChange = (index, field, value) => {
     const updated = [...form.roadmap];
-    updated[index][field] = value;
+    if (field === 'kegiatan') updated[index].kegiatan = value;
+    if (field === 'detail') updated[index].detail = value;
+    if (field === 'tanggal') updated[index].tanggal = value;
     setForm({ ...form, roadmap: updated });
   };
 
@@ -33,13 +40,6 @@ export default function NewRoadmapModal({ onClose }) {
     setForm({ ...form, roadmap: updated });
   };
 
-  const [companies, setCompanies] = useState([]);
-  const [selectedCif, setSelectedCif] = useState('');
-
-  const [dealRefList, setDealRefList] = useState([]);
-  const [selectedDealRef, setSelectedDealRef] = useState('');
-
-
   useEffect(() => {
     const token = localStorage.getItem('token');
     fetchPerusahaan(setCompanies, token);
@@ -54,15 +54,34 @@ export default function NewRoadmapModal({ onClose }) {
     }
   }, [selectedCif]);
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', form);
-    onClose();
+
+  const handleSubmit = async () => {
+    if (
+      !selectedCif ||
+      !selectedDealRef ||
+      form.roadmap.some(item => !item.kegiatan || !item.detail || !item.tanggal)
+    ) {
+      toast.error('Harap lengkapi semua field terlebih dahulu.');
+      return;
+    }
+
+    const result = await submitRoadmapPlan({
+      cif: selectedCif,
+      deal_ref: selectedDealRef,
+      roadmap: form.roadmap,
+    });
+
+    if (result.success) {
+      toast.success('Roadmap berhasil dikirim!');
+      onClose();
+    } else {
+      toast.error(`Gagal mengirim: ${result.error}`);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="bg-white w-full max-w-xl max-h-[90vh] rounded-xl overflow-hidden shadow-md flex flex-col">
-        {/* Header */}
         <div className="bg-teal-500 text-white px-6 py-4 flex justify-between items-center">
           <span className="text-lg font-bold">New Roadmap</span>
           <button
@@ -74,7 +93,6 @@ export default function NewRoadmapModal({ onClose }) {
           </button>
         </div>
 
-        {/* Form Body */}
         <div className="p-6 space-y-4 overflow-y-auto max-h-[65vh]">
           {step === 1 ? (
             <>
@@ -126,7 +144,6 @@ export default function NewRoadmapModal({ onClose }) {
               <div className="overflow-y-auto max-h-[60vh] pr-2">
                 {form.roadmap.map((item, i) => (
                   <div key={i} className="space-y-2 border rounded-lg p-4 mb-4 relative bg-gray-50 shadow-sm">
-                    {/* ❌ Delete Button */}
                     {form.roadmap.length > 1 && (
                       <button
                         onClick={() => removeRoadmapRow(i)}
@@ -144,7 +161,6 @@ export default function NewRoadmapModal({ onClose }) {
                         className="w-full border px-4 py-2 rounded"
                       />
                     </div>
-
                     <div>
                       <label className="block font-semibold mb-1">Detail Kegiatan</label>
                       <input
@@ -154,7 +170,6 @@ export default function NewRoadmapModal({ onClose }) {
                         className="w-full border px-4 py-2 rounded"
                       />
                     </div>
-
                     <div>
                       <label className="block font-semibold mb-1">Tanggal</label>
                       <input
@@ -175,7 +190,6 @@ export default function NewRoadmapModal({ onClose }) {
                 Tambah Kegiatan
               </button>
 
-              {/* Navigation buttons */}
               <div className="flex justify-between mt-6">
                 <button
                   onClick={() => setStep(1)}
