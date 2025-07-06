@@ -1,10 +1,10 @@
 export default function LoadingRipple({
-  color = "#6B46C1", 
-  duration = "2s",
-  thickness = "4px",
+  color = "#ADD8E6", 
+  duration = "3s",
+  thickness = "5px",
   initialSize = "0px",
-  finalSize = "100px",
-  startOpacity = 0.7,
+  finalSize = "200px",
+  startOpacity = 0.9,
   endOpacity = 0,
   easeFunction = "cubic-bezier(0, 0.2, 0.8, 1)"
 }) {
@@ -24,6 +24,9 @@ export default function LoadingRipple({
     >
       <span></span>
       <span></span>
+      <span></span> 
+      <span></span> 
+      <span></span> 
       <span></span> 
     </div>
   );

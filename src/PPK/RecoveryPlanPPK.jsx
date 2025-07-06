@@ -1,5 +1,5 @@
 import Layout from '../components/Layout';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import NewRoadmapModal from './AddRoadMap';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { fetchUserRoadmapPlans } from '../services/FetchRoadmapUser';
@@ -10,12 +10,42 @@ export default function RecoveryPlanStatusPPK() {
   const [showModal, setShowModal] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterBy, setFilterBy] = useState('staff');
+  const [filterBy, setFilterBy] = useState('fasilitas');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+
+  const filteredPlans = useMemo(() => {
+    return recoveryPlans.filter((item) => {
+      const value = String(item[filterBy] || '').toLowerCase();
+      return value.includes(searchQuery.toLowerCase());
+    });
+  }, [recoveryPlans, searchQuery, filterBy]);
+
+  const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredPlans.slice(indexOfFirstItem, indexOfLastItem);
 
   useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    } else if (totalPages === 0 && currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [filteredPlans, currentPage, totalPages]);
+
+  useEffect(() => {
+    setLoading(true); 
     fetchUserRoadmapPlans()
       .then((data) => {
-        const formatted = data.map((item) => ({
+        const sortedData = [...data].sort((a, b) => {
+          const dateA = new Date(a.created_at);
+          const dateB = new Date(b.created_at);
+          return dateB.getTime() - dateA.getTime();
+        });
+
+        const formatted = sortedData.map((item) => ({
           staff: item.created_by.name,
           company: item.deal_ref,
           time: new Date(item.created_at).toLocaleDateString('id-ID'),
@@ -24,8 +54,11 @@ export default function RecoveryPlanStatusPPK() {
         }));
         setRecoveryPlans(formatted);
       })
+      .catch((error) => {
+        console.error("Error fetching roadmap plans:", error);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, []); 
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -40,19 +73,8 @@ export default function RecoveryPlanStatusPPK() {
     }
   };
 
-  const filteredPlans = recoveryPlans.filter((item) => {
-    const value = {
-      staff: item.staff || '',
-      company: item.company || '',
-      status: item.status || '',
-    }[filterBy];
-
-    return value.toLowerCase().includes(searchQuery.toLowerCase());
-  });
-
-
   return (
-    <Layout title="Recovery Plan Status">
+    <Layout title="Recovery Plan Status" breadcrumbs={[{ label: 'Recovery Plan Kredit', path: '/recovery/ppk' }]}>
       {/* Search Bar */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <select
@@ -60,8 +82,8 @@ export default function RecoveryPlanStatusPPK() {
           onChange={(e) => setFilterBy(e.target.value)}
           className="border rounded px-3 py-2 text-sm"
         >
-          <option value="staff">Nama Staff</option>
-          <option value="company">Nama Perusahaan</option>
+          {/* <option value="staff">Nama Staff</option> */}
+          <option value="company">Nama Fasilitas</option>
           <option value="status">Status</option>
         </select>
         <input
@@ -81,13 +103,13 @@ export default function RecoveryPlanStatusPPK() {
           <table className="w-full text-sm text-left table-auto">
             <thead className="bg-gray-100 text-gray-600 font-medium">
               <tr>
-                {["Nama Staff", "Perusahaan", "Jam Pengajuan", "Nominal Outstanding", "Status"].map((header, index) => (
+                {["Nama Staff", "Fasilitas", "Tanggal Pengajuan", "Nominal Outstanding", "Status"].map((header, index) => (
                   <th key={index} className="px-6 py-3">{header}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: itemsPerPage }).map((_, i) => (
                 <tr key={i} className="border-b">
                   {Array.from({ length: 5 }).map((_, j) => (
                     <td key={j} className="px-6 py-3">
@@ -106,15 +128,15 @@ export default function RecoveryPlanStatusPPK() {
             <thead className="bg-gray-100 text-gray-600 font-medium">
               <tr>
                 <th className="px-6 py-3">Nama Staff</th>
-                <th className="px-6 py-3">Perusahaan</th>
-                <th className="px-6 py-3">Jam Pengajuan</th>
+                <th className="px-6 py-3">Fasilitas</th>
+                <th className="px-6 py-3">Tanggal Pengajuan</th>
                 <th className="px-6 py-3">Nominal Outstanding</th>
                 <th className="px-6 py-3">Status</th>
               </tr>
             </thead>
             <tbody>
-              {filteredPlans.length > 0 ? (
-                filteredPlans.map((item, i) => (
+              {currentItems.length > 0 ? (
+                currentItems.map((item, i) => (
                   <tr key={i} className="border-b">
                     <td className="px-6 py-3">{item.staff}</td>
                     <td className="px-6 py-3">{item.company}</td>
@@ -142,6 +164,40 @@ export default function RecoveryPlanStatusPPK() {
               )}
             </tbody>
           </table>
+          {filteredPlans.length > 0 && (
+            <div className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 rounded text-sm font-medium border text-gray-700 hover:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 cursor-pointer disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+
+              <div className="flex items-center gap-2">
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`w-8 h-8 rounded-full text-sm font-medium flex items-center justify-center border transition cursor-pointer ${currentPage === i + 1
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "text-gray-700 border-gray-300 hover:bg-gray-100"
+                      }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 rounded text-sm font-medium border text-gray-700 hover:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 cursor-pointer disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -149,7 +205,7 @@ export default function RecoveryPlanStatusPPK() {
       <div className="mt-10 text-justify-left">
         <button
           onClick={() => setShowModal(true)}
-          className="border px-6 py-3 text-lg font-semibold"
+          className="border px-6 py-3 text-lg font-semibold cursor-pointer rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-2"
         >
           Add Roadmap +
         </button>

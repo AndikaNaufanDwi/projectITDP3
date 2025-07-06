@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import LoadingLineReveal from './ui/LoadingLine';
 import { HomeIcon, BuildingOfficeIcon, DocumentMagnifyingGlassIcon, ArrowLeftEndOnRectangleIcon } from '@heroicons/react/24/solid';
-import logoRevino from '../assets/revinoBG.png';
+import logoRevino from '../assets/crevino.png';
 import { motion } from 'framer-motion';
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
@@ -21,6 +21,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     setTimeout(() => {
       localStorage.removeItem('token');
       localStorage.removeItem('role');
+      localStorage.removeItem('userName');
       navigate('/');
     }, 300);
   };
@@ -195,7 +196,8 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
       <div className="mt-auto mb-4 px-4 py-5 text-sm text-gray-500">
         <button
           onClick={handleLogout}
-          className="flex items-center space-x-2 hover:text-red-500"
+          className="flex items-center space-x-2 hover:text-red-500 cursor-pointer transition-colors duration-200"
+          disabled={loadingLogout}
         >
           <ArrowLeftEndOnRectangleIcon className="h-5 w-5" />
           <span>Log Out</span>

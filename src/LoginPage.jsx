@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import loginImage from './assets/loginImage.png';
 import logoBJB from './assets/bjb.png';
-import logoRevino from './assets/revinoBG.png';
+import logoRevino from './assets/crevino.png';
 import RippleLoader from './components/ui/RippleLoader';
 import LoadingLineReveal from './components/ui/LoadingLine';
 import axios from 'axios';
@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
-  const base_url = 'https://2dbc-182-253-124-143.ngrok-free.app/';
+  const base_url = 'https://608c-210-210-144-170.ngrok-free.app/';
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,10 +26,11 @@ export default function LoginPage() {
         password,
       });
 
-      const { access_token, role } = response.data;
+      const { access_token, role, name } = response.data;
 
       localStorage.setItem('token', access_token);
       localStorage.setItem('role', role);
+      localStorage.setItem('userName', name);
 
       if (role === 'Manager PPK') {
         navigate('/dashboard');
@@ -136,7 +137,8 @@ export default function LoginPage() {
 // );
   // Ripple Loading
   return loading ? (
-    <div className="h-screen w-screen flex justify-center items-center bg-white">
+    <div className="h-screen w-screen flex justify-center items-center bg-gray-50">
+      {/* bg-gray-800 */}
       <RippleLoader />
     </div>
   ) : (
@@ -153,10 +155,10 @@ export default function LoginPage() {
           <img
             src={logoRevino}
             alt="Revino Logo"
-            className="h-35 w-auto mx-auto mb-6 drop-shadow-xl"
+            className="h-45 w-auto mx-auto mb-6 drop-shadow-xl"
           />
 
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
             Credit Recovery<br /> Intelligence and Optimization
           </h1>
         </div>
@@ -165,7 +167,7 @@ export default function LoginPage() {
       {/* Right Section - Login Form */}
       <div className="w-full md:w-1/2 flex justify-center items-center px-8 py-12 bg-white">
         <div className="max-w-sm w-full">
-          <img src={logoBJB} alt="bank bjb" className="h-20 mx-auto mb-8" />
+          <img src={logoBJB} alt="bank bjb" className="h-24 mx-auto mb-8" />
           <h2 className="text-center text-xl font-semibold text-gray-800 mb-6">
             Log In
           </h2>

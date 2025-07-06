@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --ripple-main-color: #6B46C1; 
+  --ripple-main-color: #ADD8E6; 
   --ripple-start-opacity: 0.7;
   --ripple-end-opacity: 0;
   --ripple-border-thickness: 4px;
@@ -43,7 +43,6 @@
 .ripple-loader span:nth-child(3) {
   animation-delay: calc(var(--ripple-animation-duration) / -1.5); 
 }
-
 
 @keyframes ripple {
   0% {

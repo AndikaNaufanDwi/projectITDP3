@@ -11,7 +11,7 @@ import { deleteHistory } from './services/HapusHistory';
 import { toast, Bounce } from "react-toastify";
 import { downloadDocxFile } from "./services/AutoRekap";
 import { FaTrash, FaEdit } from "react-icons/fa";
-
+import { OrbitProgress } from "react-loading-indicators";
 
 export default function DetailFasilitas() {
     const [activeTab, setActiveTab] = useState('history');
@@ -91,19 +91,20 @@ export default function DetailFasilitas() {
             toast.error('Gagal menambahkan event');
         } finally {
             setIsSubmitting(false);
-        } 
-    };
-
-    const handleDownload = async () => {
-        try {
-            await downloadDocxFile(fasilitas.cif);
-        } catch (err) {
-            alert("Gagal mendownload file.");
         }
     };
 
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const handleDownload = async () => {
+        setIsDownloading(true);
+        try {
+            await downloadDocxFile(fasilitas.deal_ref);
+        } catch (err) {
+            alert("Gagal mendownload file.");
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     useEffect(() => {
@@ -123,10 +124,10 @@ export default function DetailFasilitas() {
     }
 
     const breadcrumbs = [
-  { label: 'Companies', path: '/fasilitas' },
-  { label: fasilitas?.nama_perusahaan || 'Detail Perusahaan', path: `/fasilitas/company-detail/${fasilitas?.cif || ''}` },
-  { label: fasilitas?.deal_ref || 'Detail Fasilitas', path: `/fasilitas/facility-detail/${fasilitas?.deal_ref || ''}` }
-];
+        { label: 'Companies', path: '/fasilitas' },
+        { label: fasilitas?.nama_perusahaan || 'Detail Perusahaan', path: `/fasilitas/company-detail/${fasilitas?.cif || ''}` },
+        { label: fasilitas?.deal_ref || 'Detail Fasilitas', path: `/fasilitas/facility-detail/${fasilitas?.deal_ref || ''}` }
+    ];
 
     return (
         <Layout title="Detail Fasilitas" breadcrumbs={breadcrumbs}>
@@ -138,7 +139,23 @@ export default function DetailFasilitas() {
                             <h1 className="text-2xl font-bold">{fasilitas.nama_perusahaan}</h1>
                             <p className="text-sm text-gray-500">CIF {fasilitas.cif}</p>
                         </div>
-                        <button onClick={handleDownload} className="bg-yellow-400 px-6 py-2 rounded font-bold">Auto Rekap</button>
+                        <button
+                            onClick={handleDownload}
+                            disabled={isDownloading}
+                            className={`bg-yellow-400 px-6 py-2 rounded font-bold flex items-center justify-center min-w-[120px] cursor-pointer transition-colors duration-200 ${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-500'}`}
+                        >
+                            {isDownloading ? (
+                                <OrbitProgress
+                                    variant="track-disc"
+                                    color="#707670"
+                                    size="small"
+                                    text=""
+                                    textColor=""
+                                />
+                            ) : (
+                                "Auto Rekap"
+                            )}
+                        </button>
                     </div>
 
                     {/* Loan Detail Section */}
@@ -199,7 +216,7 @@ export default function DetailFasilitas() {
                                 setEditedAgunan([...fasilitas.agunan]);
                                 setIsEditOpen(true);
                             }}
-                            className="mt-2 text-sm px-4 py-1 bg-gray-300 rounded"
+                            className="mt-2 text-sm px-4 py-1 bg-gray-300 rounded cursor-pointer hover:bg-gray-400 transition duration-200"
                         >
                             Edit
                         </button>
@@ -210,7 +227,7 @@ export default function DetailFasilitas() {
                     <div className="flex border-b mb-4">
                         <button
                             onClick={() => setActiveTab('roadmap')}
-                            className={`px-4 py-2 font-semibold ${activeTab === 'roadmap'
+                            className={`px-4 py-2 font-semibold cursor-pointer ${activeTab === 'roadmap'
                                 ? 'text-blue-900 border-b-2 border-blue-900'
                                 : 'text-gray-600 border-b-2 border-transparent'
                                 }`}
@@ -219,7 +236,7 @@ export default function DetailFasilitas() {
                         </button>
                         <button
                             onClick={() => setActiveTab('history')}
-                            className={`px-4 py-2 font-semibold ${activeTab === 'history'
+                            className={`px-4 py-2 font-semibold cursor-pointer ${activeTab === 'history'
                                 ? 'text-blue-900 border-b-2 border-blue-900'
                                 : 'text-gray-600 border-b-2 border-transparent'
                                 }`}
@@ -258,7 +275,7 @@ export default function DetailFasilitas() {
                                     setEventImage(null);
                                     setPreviewUrl("");
                                 }}
-                                className="mb-4 bg-blue-900 text-white px-4 py-2 rounded text-sm"
+                                className="mb-4 bg-blue-900 text-white px-4 py-2 rounded text-sm cursor-pointer hover:bg-blue-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Tambah Event
                             </button>
@@ -376,18 +393,18 @@ export default function DetailFasilitas() {
                                 />
                             </div>
                             <div>
-  <label className="block text-sm font-medium">Status</label>
-  <select
-    value={eventStatus}
-    onChange={e => setEventStatus(e.target.value)}
-    required
-    className="border w-full px-3 py-2 rounded mt-1"
-  >
-    <option value="">Pilih status</option>
-    <option value="Berhasil">Berhasil</option>
-    <option value="Gagal">Gagal</option>
-  </select>
-</div>
+                                <label className="block text-sm font-medium">Status</label>
+                                <select
+                                    value={eventStatus}
+                                    onChange={e => setEventStatus(e.target.value)}
+                                    required
+                                    className="border w-full px-3 py-2 rounded mt-1"
+                                >
+                                    <option value="">Pilih status</option>
+                                    <option value="Berhasil">Berhasil</option>
+                                    <option value="Gagal">Gagal</option>
+                                </select>
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Upload Gambar</label>
 

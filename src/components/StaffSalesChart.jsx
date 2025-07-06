@@ -50,10 +50,10 @@ export default function StaffSalesChart({ name = 'Staff Name', sold = 0, notSold
   return (
     <div className="w-full bg-white p-6 rounded-lg shadow relative">
       {/* Top-left Username */}
-      <h3 className="text-lg font-bold text-gray-700 absolute top-4 left-4 z-10">{name}</h3> 
+      <h3 className="text-lg font-bold text-gray-700 absolute top-2 left-4 z-10">{name}</h3> 
 
       {/* Doughnut Chart Container */}
-      <div className="flex justify-center items-center h-48 sm:h-56 md:h-64 mb-4"> 
+      <div className="flex justify-center items-center h-48 sm:h-56 md:h-64 mb-4 py-4"> 
         <Doughnut data={data} options={options} />
       </div>
 

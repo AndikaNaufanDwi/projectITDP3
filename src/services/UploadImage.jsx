@@ -1,6 +1,6 @@
 export const uploadImage = async (file) => {
   const formData = new FormData();
-  const base_url = 'https://2dbc-182-253-124-143.ngrok-free.app/'; 
+  const base_url = 'https://608c-210-210-144-170.ngrok-free.app/'; 
   formData.append('image', file);
 
   try {

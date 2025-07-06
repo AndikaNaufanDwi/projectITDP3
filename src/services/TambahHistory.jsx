@@ -1,6 +1,6 @@
 export const tambahHistory = async ({ token, data }) => {
   const formData = new FormData();
-  const BASE_URL = 'https://2dbc-182-253-124-143.ngrok-free.app/';
+  const BASE_URL = 'https://608c-210-210-144-170.ngrok-free.app/';
 
   formData.append('deal_ref', data.deal_ref);
   formData.append('jenis_kegiatan', data.jenis_kegiatan);

@@ -71,7 +71,7 @@ export default function DetailPerusahaan() {
 
     if (!company && !loadingFacilities) {
         return (
-            <Layout breadcrumbs={[{ label: 'Error', path: '/fasilitas' }]}> {/* Pass breadcrumbs for error state */}
+            <Layout breadcrumbs={[{ label: 'Error', path: '/fasilitas' }]}> 
                 <div className="text-center py-10 text-gray-600">
                     <p>Company data not found. Please navigate from the company list or check the URL.</p>
                     <button

@@ -27,7 +27,12 @@ export default function RecoveryPlanDetailPage() {
   };
 
   return (
-    <Layout title="Companies">
+    <Layout
+      breadcrumbs={[
+        { label: 'Recovery Plan Kredit', path: '/recovery' },
+        { label: id, path: `/recovery/${id}` }
+      ]}
+    >
       {/* Action Buttons */}
       <div className="flex gap-4 mb-6">
         <button onClick={handleAccept} className="bg-blue-800 text-white px-5 py-2 rounded font-semibold">

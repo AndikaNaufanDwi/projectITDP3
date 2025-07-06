@@ -1,6 +1,6 @@
 export const fetchRoadmapEventsById = async (planId) => {
   const token = localStorage.getItem('token');
-  const BASE_URL = 'https://2dbc-182-253-124-143.ngrok-free.app/';
+  const BASE_URL = 'https://608c-210-210-144-170.ngrok-free.app/';
 
   try {
     const res = await fetch(`${BASE_URL}/roadmap-plans/${planId}`, {
@@ -25,7 +25,7 @@ export const fetchRoadmapEventsById = async (planId) => {
 
 export const UpdateRoadmap = async (id, status) => {
   const token = localStorage.getItem('token');
-  const BASE_URL = 'https://2dbc-182-253-124-143.ngrok-free.app/';
+  const BASE_URL = 'https://608c-210-210-144-170.ngrok-free.app/';
 
   const res = await fetch(`${BASE_URL}/roadmap/${id}/status`, {
     method: 'PATCH',
@@ -41,7 +41,7 @@ export const UpdateRoadmap = async (id, status) => {
 
 export const updateRoadmapStatus = async (planId, newStatus) => {
   const token = localStorage.getItem('token');
-  const BASE_URL = 'https://2dbc-182-253-124-143.ngrok-free.app/';
+  const BASE_URL = 'https://608c-210-210-144-170.ngrok-free.app/';
 
   try {
     const res = await fetch(`${BASE_URL}/roadmap-plans/${planId}`, {
