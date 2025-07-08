@@ -1,5 +1,5 @@
 export const fetchUserRoadmapPlans = async () => {
-  const BASE_URL = 'https://608c-210-210-144-170.ngrok-free.app/';
+  const BASE_URL = 'https://f15045b4c2d4.ngrok-free.app/';
   const token = localStorage.getItem('token');
 
   try {

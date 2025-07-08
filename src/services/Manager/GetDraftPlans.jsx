@@ -1,5 +1,5 @@
 export const fetchDraftPlans = async (token) => {
-  const base_url = 'https://608c-210-210-144-170.ngrok-free.app/';
+  const base_url = 'https://f15045b4c2d4.ngrok-free.app/';
 
   try {
     const response = await fetch(`${base_url}/roadmap-plans`, {

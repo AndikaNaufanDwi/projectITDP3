@@ -1,5 +1,5 @@
 export const fetchAgunanSummaryPerAO = async (token) => {
-  const BASE_URL = 'https://608c-210-210-144-170.ngrok-free.app/';
+  const BASE_URL = 'https://f15045b4c2d4.ngrok-free.app/';
 
   try {
     const response = await fetch(`${BASE_URL}/agunan/status`, {
